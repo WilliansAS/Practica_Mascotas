@@ -42,14 +42,25 @@ app.post('/acceso',(peticion,respuesta)=>{
     (error,resultado)=>{
      if(error) return respuesta.json({mensaje:"Error en la consulta"});
      if(resultado.length > 0){
-         const token=jwt.sign({usuario:'administrador'},'12345',{expiresIn:'1d'});
+         const token=jwt.sign({usuario:'administrador'},'123',{expiresIn:'1d'});
          respuesta.cookie(token);
-         return respuesta.json({Estatus:"CORRECTO",Usario:token})
+         return respuesta.json({Estatus:"CORRECTO",Usuario:token})
      }else{
         return respuesta.json({Estatus:"ERROR",Error:"Usuario contraseña incorrecta"});
      }
      })
     });
+
+//Registrar usuario
+    app.post('/registro',(peticion,respuesta)=>{
+        const sql="INSERT INTO usuarios(nombre_usuario,correo_electronico,contrasenia) VALUES(?,?,sha1(?))";
+        console.log(peticion.body);
+        conexion.query(sql,[peticion.body.nombre_usuario,peticion.body.correo_electronico,peticion.body.contrasenia],
+       (error,resultado)=>{
+        if(error) return respuesta.json({mensaje:"Error en la consulta"});
+        return respuesta.json({Estatus:"CORRECTO"});
+        })
+       });
      
 
 
