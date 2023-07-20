@@ -1,7 +1,8 @@
 import express from 'express';
 import mysql from 'mysql';
 import cors from 'cors';
-import jwt from 'jsonwebtoken';
+import multer from 'multer';
+import path from 'path';
 
 //CREAR LAS INSTANCIA DE EXPRESS
 const app=express();
@@ -61,6 +62,31 @@ app.post('/acceso',(peticion,respuesta)=>{
         return respuesta.json({Estatus:"CORRECTO"});
         })
        });
+
+       //Subir imagenes al servidor 
+       //destination indica en donde se va a guardar  
+       const almacenamiento = multer.diskStorage({
+        destination:(peticion,archivo,funcion)=>{
+            funcion(null,'public/imagenes')
+        },
+    filename:(peticion,archivo,funcion)=> {
+        funcion(null, archivo.originalname + path.extname(archivo.originalname))
+    }
+
+    });
+
+    const subirFoto = multer({
+        storage: almacenamiento
+    })
+
+    app.post('/AgregarMascota', subirFoto.single('foto'),(peticion, respuesta) =>{
+    const sql="INSERT INTO mascota (nombre,edad,foto,estatus) VALUES (?)";
+    const datos=[peticion.body.nombre,peticion.body.edad,peticion.file.filename,peticion.body.estatus];
+    conexion.query(sql, [datos],(error,resultado)=>{
+        if(error) return respuesta.json({"Estatus":"ERROR"});
+        return respuesta.json({'Estatus' : "EXITOSO"})
+    })
+    })
      
 
 
